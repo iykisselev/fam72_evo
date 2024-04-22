@@ -6,8 +6,8 @@ wget -q ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_hig
 wget -q ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/20130606_g1k_3202_samples_ped_population.txt
 
 # Extract non-zero parent IDs to remove them from future analyses
-awk 'NR > 1 {if ($2 != 0) print $2; if ($3 != 0) print $3;}' 1kGP.3202_samples.pedigree_info.txt | \
-sort -nu > samples_to_remove.txt
+awk 'NR > 1 {if ($2 != 0 && $2 != "") print $2; if ($3 != 0 && $3 != "") print $3;}' 1kGP.3202_samples.pedigree_info.txt | \
+sort | uniq > samples_to_remove.txt
 
 # Load genomic tools
 module load tabix bcftools

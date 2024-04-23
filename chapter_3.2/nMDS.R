@@ -8,6 +8,9 @@ library(rcartocolor)
 # Load pairwise Fst matrices
 fst_matrices <- readRDS("./pop_diff/wc_pairwise_fst.Rdata")
 
+# Load population info
+popdata <- read.delim("20130606_g1k_3202_samples_ped_population.txt", sep=" ")
+
 # Function to perform nMDS based on a pairwise Fst matrix
 nmds <- function(fam72_pairwise_fst) {
   # Convert the Fst matrix to a numerical matrix

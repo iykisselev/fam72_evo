@@ -5,65 +5,64 @@ library(ggplot2)
 library(ggrepel)
 library(rcartocolor)
 
-# Load pairwise Fst matrices
+# Load pairwise Fst matrices and population info
 fst_matrices <- readRDS("./pop_diff/wc_pairwise_fst.Rdata")
-
-# Load population info
 popdata <- read.delim("20130606_g1k_3202_samples_ped_population.txt", sep=" ")
 
 # Function to perform nMDS based on a pairwise Fst matrix
-nmds <- function(fam72_pairwise_fst) {
-  # Convert the Fst matrix to a numerical matrix
-  nmds_matrix <- as.matrix(fam72_pairwise_fst)
-  # Perform nMDS
-  fam72_nmds <- metaMDS(nmds_matrix, k = 2, trymax = 10000)
-  # Print the nMDS results to console
-  print(fam72_nmds)
-  return(fam72_nmds)
+nmds <- function(fst_matrix) {
+  nmds_matrix <- as.matrix(fst_matrix)
+  nmds_result <- metaMDS(nmds_matrix, k = 2, trymax = 10000)
+  print(nmds_result)
+  return(nmds_result)
 }
 
 # Function to create a dataframe from nMDS results for plotting
-nmds_df <- function(fam72_nmds, popdata) {
-  # Convert the nMDS points to a dataframe
-  fam72_data <- as.data.frame(fam72_nmds$points)
-  fam72_data$Population <- rownames(fam72_data)
-  # Add superpopulation and out-of-Africa (OoA) info
-  fam72_data$Superpopulation <- popdata$Superpopulation[match(fam72_data$Population, popdata$Population)]
-  fam72_data$OoA <- ifelse(fam72_data$Superpopulation == "AFR", "AFR", "OoA")
-  return(fam72_data)
+nmds2df <- function(nmds_result, popdata) {
+  nmds_data <- as.data.frame(nmds_result$points)
+  nmds_data$Population <- rownames(nmds_data)
+  nmds_data$Superpopulation <- popdata$Superpopulation[match(nmds_data$Population, popdata$Population)]
+  nmds_data$OoA <- ifelse(nmds_data$Superpopulation == "AFR", "AFR", "OoA")
+  return(nmds_data)
 }
 
-# Assuming that popdata is already loaded
-popdata <- read.delim("20130606_g1k_3202_samples_ped_population.txt", sep=" ")
+# Function to run nMDS analysis and generate dataframe for a list of Fst matrices
+run_nmds <- function(fst_matrices, popdata) {
+  nmds_results <- lapply(fst_matrices, nmds)
+  names(nmds_results) <- c("FAM72A", "FAM72B", "FAM72C", "FAM72D")
+  
+  df_plot <- do.call(rbind, lapply(names(nmds_results), function(name) {
+    df <- nmds2df(nmds_results[[name]], popdata)
+    df$Gene <- name
+    return(df)
+  }))
+  
+  return(df_plot)
+}
 
-# Run nMDS analysis for each gene
-nmds_results <- lapply(fst_matrices, nmds)
+# Function to create a scatter plot from the nMDS dataframe
+create_nmds_plot <- function(df_plot) {
+  plt <- ggplot(data = df_plot, aes(x = MDS1, y = MDS2, color = Superpopulation)) +
+    geom_text_repel(max.overlaps = 30, aes(label = Population), size = 3.5) +
+    geom_point(size = 2.5) +
+    scale_color_manual(values = carto_pal(6, "Bold")[-6]) +
+    theme_bw() +
+    guides(size = "none", color = guide_legend(ncol = 1, override.aes = list(size = 5))) +
+    theme(legend.position = "right", legend.box = "vertical", legend.text = element_text(size = 12), 
+          legend.title = element_text(size = 14), axis.title = element_text(size = 12),
+          strip.background = element_blank(), strip.placement = "outside", 
+          strip.text = element_text(size = 12)) +
+    labs(x = "Axis 1", y = "Axis 2", color = "Superpopulation") +
+    facet_wrap(~Gene, strip.position = "top")
+  
+  return(plt)
+}
 
-# Names for nMDS results corresponding to each gene
-names(nmds_results) <- c("FAM72A", "FAM72B", "FAM72C", "FAM72D")
-
-# Combine all nMDS results into a single dataframe for plotting
-df_plot <- do.call(rbind, lapply(names(nmds_results), function(name) {
-  df <- nmds_df(nmds_results[[name]], popdata)
-  df$Gene <- name
-  return(df)
-}))
-
-# Create a scatter plot using ggplot2 with text labels and custom color palettes
-nmds_plt <- ggplot(data = df_plot, aes(x = MDS1, y = MDS2, color = Superpopulation)) +
-  geom_text_repel(max.overlaps = 30, aes(label = Population), size = 3.5) +
-  geom_point(size = 2.5) +
-  scale_color_manual(values = carto_pal(6, "Bold")[-6]) +
-  theme_bw() +
-  guides(size = "none", color = guide_legend(ncol = 1, override.aes = list(size = 5))) +
-  theme(legend.position = "right", legend.box = "vertical", legend.text = element_text(size = 12), 
-        legend.title = element_text(size = 14), axis.title = element_text(size = 12),
-        strip.background = element_blank(), strip.placement = "outside", 
-        strip.text = element_text(size = 12)) +
-  labs(x = "Axis 1", y = "Axis 2", color = "Superpopulation") +
-  facet_wrap(~Gene, strip.position = "top")
+# Run nMDS analysis and create the plot
+df_plot <- run_nmds(fst_matrices, popdata)
+nmds_plot <- create_nmds_plot(df_plot)
 
 # Save the plot
 svg("./pop_diff/nmds.svg", width = 11.3, height = 10)
-print(nmds_plt)
+print(nmds_plot)
 dev.off()

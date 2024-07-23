@@ -1,5 +1,5 @@
 #!/bin/bash
-# The script extracts and filters FAM72A-D genomic regions from the 1000 Genomes and V3.1.2 GNOMAD VCF files based on coordinates provided in 'fam72.grch38.tsv'. It downloads data from the 1000 Genomes Project, then extracts and processes genomic regions to keep only biallelic SNPs and remove parents from trio sample groups. Filtering is not applied to the GNOMAD data.
+# The script extracts and filters FAM72A-D genomic regions from the 1000 Genomes and V3.1.2 gnomAD VCF files based on coordinates provided in 'fam72.grch38.tsv'. It downloads data from the 1000 Genomes Project, then extracts and processes genomic regions to keep only biallelic SNPs and remove parents from trio sample groups. Filtering is not applied to the GNOMAD data.
 
 # Download necessary files from 1000 Genomes Project and gnomAD
 download_files() {

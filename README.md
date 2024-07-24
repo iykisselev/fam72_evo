@@ -1,6 +1,7 @@
-# Evolutionary history and diversity of human-specific FAM72A paralogs: insights from population genetics
+# Evolutionary history and diversity of human-specific FAM72A paralogs
 
-This repository contains code that was used for data analysis and figures in my MSc thesis:
-> Kisselev, Ilya. Evolutionary history and diversity of human-specific FAM72A paralogs: insights from population genetics. Winnipeg, Manitoba, Canada: The University of Winnipeg, 2023. DOI: 10.36939/ir.202312181420. [pdf](https://winnspace.uwinnipeg.ca/bitstream/handle/10680/2126/Kisselev_Ilya_Final_MSc_thesis_2023.pdf)
+This repository contains the analysis code for:
 
-Feel free to reuse anything, but please cite properly.
+> Kisselev, Ilya. *Evolutionary history and diversity of human-specific FAM72A
+> paralogs: insights from population genetics*. University of Winnipeg, 2023.
+> DOI: [10.36939/ir.202312181420](https://doi.org/10.36939/ir.202312181420).
